@@ -1,0 +1,7 @@
+{
+"functions": {
+"use-package-core": ["macro", 2, 2, {}],
+"use-package-jump-to-package-form": ["func", 1, 1, {}],
+"use-package": ["macro", 1, "many", {"indent": "defun"}]
+}
+}
