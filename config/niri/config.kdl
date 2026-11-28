@@ -30,7 +30,7 @@ gestures {
     }
 }
 cursor {
-    xcursor-theme "macOS"
+    xcursor-theme "Adwaita"
     xcursor-size 24
     hide-when-typing
     hide-after-inactive-ms 1000
@@ -145,6 +145,10 @@ window-rule {
     default-window-height {
         fixed 600
     }
+}
+window-rule {
+    match app-id="^emacs$"
+    open-focused true
 }
 window-rule {
     match app-id="clipse"

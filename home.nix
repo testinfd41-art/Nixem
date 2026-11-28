@@ -1,4 +1,9 @@
-{ config, inputs, pkgs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 let
   dotfiles = "${config.home.homeDirectory}/nixos-dotfiles/config";
   localfiles = "${config.home.homeDirectory}/nixos-dotfiles/local";
@@ -61,6 +66,7 @@ in
       epkgs.nix-mode
       epkgs.nixfmt
       epkgs.corfu
+      epkgs.magit
     ];
   };
 
@@ -92,12 +98,10 @@ in
     fd
     git
   ];
-  xdg.configFile = builtins.mapAttrs
-    (name: subpath: {
-      source = create_symlink "${dotfiles}/${subpath}";
-      recursive = true;
-    })
-    configs;
+  xdg.configFile = builtins.mapAttrs (name: subpath: {
+    source = create_symlink "${dotfiles}/${subpath}";
+    recursive = true;
+  }) configs;
 
   home.file.".local/bin" = {
     source = create_symlink "${localfiles}/bin/";

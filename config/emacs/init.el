@@ -817,37 +817,31 @@
  :demand t
  :custom
  (corfu-auto t)
- (corfu-auto-delay 0)
- (corfu-auto-prefix 1)
+ (corfu-auto-delay 0.05)
+ (corfu-auto-prefix 2)
  (corfu-cycle t)
- (corfu-preselect 'first)
+ (corfu-preselect 'prompt)
+ (corfu-popupinfo-delay '(0.5 . 0.2))
+ ;; everywhere except these modes
+ (global-corfu-modes '((not org-mode ghostel-mode) t))
  :bind
  (:map
   corfu-map
   ("TAB" . corfu-complete)
   ("<tab>" . corfu-complete)
+  ("C-n" . corfu-next)
+  ("C-p" . corfu-previous)
   ("RET" . nil))
  :init
- (global-corfu-mode -1)) ; make sure global is off
+ (global-corfu-mode 1)
+ (corfu-popupinfo-mode 1))
 
-;; code only
-(add-hook 'prog-mode-hook #'corfu-mode)
-
-(use-package cape)
-
-;; file paths in code buffers too
-(defun my/prog-capf ()
-  (add-hook 'completion-at-point-functions #'cape-file 91 t))
-(add-hook 'prog-mode-hook #'my/prog-capf)
-
-;; popup at point in prose buffers too
-(add-hook 'text-mode-hook #'corfu-mode)
-
-(defun my/text-capf ()
-  "Offer words from open buffers while typing prose."
-  (add-hook 'completion-at-point-functions #'cape-dabbrev 90 t)
-  (add-hook 'completion-at-point-functions #'cape-file 91 t))
-(add-hook 'text-mode-hook #'my/text-capf)
+(use-package
+ cape
+ :init
+ ;; global fallbacks; buffers whose local capf list ends in `t` reach these
+ (add-hook 'completion-at-point-functions #'cape-file)
+ (add-hook 'completion-at-point-functions #'cape-dabbrev))
 
 (add-hook 'org-mode-hook
           (lambda ()
@@ -1351,3 +1345,69 @@ _q_uit          _e_qualize        _]_forward     ^
    #'magit-log-buffer-file ; history of the current file
    "gb"
    #'magit-blame-addition))
+
+(use-package
+ avy
+ :ensure t
+ :custom
+ (avy-timeout-seconds 0.3) ; wait for more chars, like flash's incremental search
+ (avy-all-windows t) ; jump across windows
+ (avy-background t) ; dim the rest of the text, flash-style
+ (avy-keys '(?a ?s ?d ?f ?j ?k ?l ?\; ?g ?h)) ; home-row labels
+ :bind
+ (("C-;" . avy-goto-char-timer) ; closest to flash's main `s` jump
+  ("C-'" . avy-goto-line) ("M-g w" . avy-goto-word-1)
+  :map isearch-mode-map
+  ("C-'" . avy-isearch))) ; jump to any match while searching
+
+(use-package
+ evil-avy
+ :ensure t
+ :after (evil avy)
+ :config (evil-avy-mode 1))
+
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "s") #'avy-goto-char-timer)
+  (define-key evil-motion-state-map (kbd "s") #'avy-goto-char-timer))
+
+(with-eval-after-load 'evil
+  (advice-add 'evil-scroll-down :after (lambda (&rest _) (recenter)))
+  (advice-add 'evil-scroll-up :after (lambda (&rest _) (recenter))))
+
+
+(use-package
+ org-bullets
+ :after org
+ :hook (org-mode . org-bullets-mode)
+ :custom
+ (org-bullets-bullet-list
+  '("\u25c9"
+    "\u25cb"
+    "\u2756"
+    "\u273f"
+    "\u25b6"
+    "\u25c6"
+    "\u2738"
+    "\u25c8")))
+
+(setq org-list-demote-modify-bullet
+      '(("-" . "+")
+        ("+" . "*")
+        ("*" . "-")
+        ("1." . "a.")
+        ("a." . "1.")
+        ("1)" . "a)")
+        ("a)" . "1)")))
+
+;; count ALL nested checkboxes, not just direct children
+(setq org-checkbox-hierarchical-statistics nil)
+
+;; auto-mark a TODO heading DONE when all its checkboxes are checked
+(defun my/org-summary-todo (n-done n-not-done)
+  (let (org-log-done
+        org-log-states)
+    (org-todo
+     (if (= n-not-done 0)
+         "DONE"
+       "TODO"))))
+(add-hook 'org-after-todo-statistics-hook #'my/org-summary-todo)

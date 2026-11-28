@@ -24,6 +24,7 @@
      doom-themes
      elisp-autofmt
      evil-anzu
+     evil-avy
      evil-collection
      gcmh
      general
@@ -39,6 +40,7 @@
      nixfmt
      orderless
      org-bullets
+     org-modern
      rainbow-delimiters
      treesit-auto
      vertico

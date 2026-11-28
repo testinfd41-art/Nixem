@@ -51,8 +51,6 @@
   services.power-profiles-daemon.enable = true;
   hardware.i2c.enable = true;
   hardware.i2c.group = "i2c";
-  programs.appimage.enable = true;
-  programs.appimage.binfmt = true;
   programs.nix-ld.enable = true;
 
   services.pipewire.wireplumber.extraConfig."disable-microphones" = {
@@ -132,7 +130,6 @@
     rmpc
     pdfarranger
     zenity
-    zed-editor
     lxmenu-data
     shared-mime-info
     poppler-utils
